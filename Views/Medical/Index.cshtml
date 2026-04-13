@@ -1,0 +1,99 @@
+@using AgentApi.Models
+@{
+    ViewData["Title"] = "Medical Image Analysis";
+    var result = ViewData["Result"] as string;
+    var modality = ViewData["Modality"] as string;
+    var fileName = ViewData["FileName"] as string;
+    var sections = result != null ? ReportSection.Parse(result) : new List<ReportSection>();
+}
+
+<div class="row">
+    <div class="col-lg-4">
+        <h4 class="mb-3">🩺 Medical Image Analysis</h4>
+        <p class="text-muted small">Upload a medical image for AI-assisted triage. This is <strong>decision support only</strong> — not a diagnosis.</p>
+
+        <div class="card p-4">
+            <form asp-action="Analyze" method="post" enctype="multipart/form-data" id="analyzeForm">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Image File</label>
+                    <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,.webp,.bmp,.gif" required />
+                    <div class="form-text">Supported: JPG, PNG, WEBP, BMP, GIF</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Modality</label>
+                    <select name="modality" class="form-select">
+                        <option value="auto">Auto-detect</option>
+                        <option value="xray">X-Ray</option>
+                        <option value="ecg">ECG</option>
+                        <option value="mri">MRI</option>
+                        <option value="ct">CT Scan</option>
+                        <option value="ultrasound">Ultrasound</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Clinical Context <span class="text-muted fw-normal">(optional)</span></label>
+                    <textarea name="clinicalContext" class="form-control" rows="3"
+                              placeholder="e.g. Chest pain for 2 hours, 55yo male, hypertensive"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger w-100" id="analyzeBtn">
+                    🔬 Analyze Image
+                </button>
+            </form>
+        </div>
+
+        <div class="alert alert-warning mt-3 small">
+            ⚠️ <strong>Disclaimer:</strong> This tool uses AI for decision support only. Always confirm findings with a licensed radiologist or cardiologist.
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        @if (result != null)
+        {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>📋 Analysis Report</h5>
+                <div>
+                    <span class="badge bg-secondary me-2">@fileName</span>
+                    <span class="badge bg-primary">@modality</span>
+                </div>
+            </div>
+
+            <div class="card p-4" style="background:#f8f9ff; border-left: 4px solid #6f42c1;">
+                @foreach (var s in sections)
+                {
+                    <div class="mb-3">
+                        @if (s.IsRedFlag)
+                        {
+                            <h6 class="text-danger">🚨 @s.Title</h6>
+                            <div class="alert alert-danger py-2">@s.Content</div>
+                        }
+                        else
+                        {
+                            <h6 class="text-primary">@s.Title</h6>
+                            <p class="mb-0" style="white-space: pre-wrap;">@s.Content</p>
+                            <hr class="my-2" />
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="d-flex align-items-center justify-content-center h-100 text-muted" style="min-height:300px;">
+                <div class="text-center">
+                    <div style="font-size:60px;">🩻</div>
+                    <p>Upload a medical image to see the AI analysis here.</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('analyzeForm').addEventListener('submit', function () {
+        const btn = document.getElementById('analyzeBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
+    });
+</script>
+}

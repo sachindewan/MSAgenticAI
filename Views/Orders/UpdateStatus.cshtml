@@ -1,0 +1,32 @@
+@model Order
+@{
+    ViewData["Title"] = "Update Status";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h4 class="mb-3">🔄 Update Order Status</h4>
+        <div class="card p-4">
+            <p><strong>Order:</strong> <code>@Model.Id</code></p>
+            <p><strong>Items:</strong> @string.Join(", ", Model.Items)</p>
+            <p><strong>Current Status:</strong>
+                <span class="badge bg-warning text-dark">@Model.Status</span>
+            </p>
+            <form asp-action="UpdateStatus" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="mb-3">
+                    <label class="form-label">New Status</label>
+                    <select name="status" class="form-select">
+                        <option>Pending</option>
+                        <option>Processing</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Update</button>
+                <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

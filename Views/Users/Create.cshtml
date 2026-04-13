@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h4 class="mb-3">➕ Create User</h4>
+        <div class="card p-4">
+            <form asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input name="name" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input name="email" type="email" class="form-control" required />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Create</button>
+                <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

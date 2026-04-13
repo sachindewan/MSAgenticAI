@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Chat";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h4 class="mb-3">💬 Chat with Agent</h4>
+        <p class="text-muted">Ask anything about users and orders in natural language.</p>
+
+        <div class="chat-box mb-3">
+            <form id="chatForm">
+                <div class="input-group mb-3">
+                    <input type="text" id="messageInput" class="form-control form-control-lg"
+                           placeholder="e.g. List all users, Create order for u1..." />
+                    <button class="btn btn-primary" type="submit">Send</button>
+                </div>
+            </form>
+            <div class="loading text-muted mb-2" id="loading">
+                <div class="spinner-border spinner-border-sm text-primary me-2"></div> Agent is thinking...
+            </div>
+            <div id="responseArea"></div>
+        </div>
+
+        <div class="text-muted small">
+            <strong>Try:</strong>
+            <a href="#" class="example-prompt me-2">List all users</a>
+            <a href="#" class="example-prompt me-2">Get orders for user u1</a>
+            <a href="#" class="example-prompt me-2">Create a new user named John with email john@test.com</a>
+            <a href="#" class="example-prompt">Update order o2 status to Shipped</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('chatForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const msg = document.getElementById('messageInput').value.trim();
+        if (!msg) return;
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('responseArea').innerHTML = '';
+
+        const res = await fetch('/Home/Chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('responseArea').innerHTML =
+            `<div class="response-box">${data.response}</div>`;
+    });
+
+    document.querySelectorAll('.example-prompt').forEach(a => {
+        a.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('messageInput').value = this.textContent;
+        });
+    });
+</script>
+}

@@ -1,0 +1,43 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "User Orders";
+    var userId = ViewData["UserId"];
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>📦 Orders for <code>@userId</code></h4>
+    <a asp-controller="Users" asp-action="Index" class="btn btn-outline-secondary btn-sm">← Back</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No orders found for this user.</div>
+}
+else
+{
+    <div class="card">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr><th>Order ID</th><th>Items</th><th>Total</th><th>Status</th><th>Created</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td><code>@order.Id</code></td>
+                        <td>@string.Join(", ", order.Items)</td>
+                        <td>$@order.Total.ToString("F2")</td>
+                        <td>
+                            <span class="badge @(order.Status == "Delivered" ? "bg-success" :
+                                               order.Status == "Shipped" ? "bg-primary" :
+                                               order.Status == "Cancelled" ? "bg-danger" : "bg-warning text-dark")">
+                                @order.Status
+                            </span>
+                        </td>
+                        <td>@order.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

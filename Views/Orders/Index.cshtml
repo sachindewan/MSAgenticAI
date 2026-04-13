@@ -1,0 +1,43 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>📦 Orders</h4>
+    <a asp-action="Create" class="btn btn-primary btn-sm">+ New Order</a>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<div class="card">
+    <table class="table table-hover mb-0">
+        <thead class="table-dark">
+            <tr><th>Order ID</th><th>User</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td><code>@order.Id</code></td>
+                    <td><code>@order.UserId</code></td>
+                    <td>@string.Join(", ", order.Items)</td>
+                    <td>$@order.Total.ToString("F2")</td>
+                    <td>
+                        <span class="badge @(order.Status == "Delivered" ? "bg-success" :
+                                           order.Status == "Shipped" ? "bg-primary" :
+                                           order.Status == "Cancelled" ? "bg-danger" : "bg-warning text-dark")">
+                            @order.Status
+                        </span>
+                    </td>
+                    <td>
+                        <a asp-action="UpdateStatus" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">Update Status</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
