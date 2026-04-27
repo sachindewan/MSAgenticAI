@@ -11,10 +11,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IChatClient>(_ =>
 {
     IChatClient ollamaClient = new OllamaApiClient(new Uri("http://localhost:11434"), "qwen2.5:0.5b");
-    return ollamaClient
-        .AsBuilder()
-        .UseFunctionInvocation()
-        .Build();
+    return ollamaClient;
+        //.AsBuilder()
+        //.UseFunctionInvocation()
+        //.Build();
 });
 
 builder.Services.AddSingleton<InMemoryStore>();
@@ -22,6 +22,7 @@ builder.Services.AddSingleton<UserTool>();
 builder.Services.AddSingleton<OrderTool>();
 builder.Services.AddSingleton<OllamaAgentService>();
 builder.Services.AddSingleton<MedicalImageService>();
+builder.Services.AddSingleton<ChatLoopService>();
 
 var app = builder.Build();
 

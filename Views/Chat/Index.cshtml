@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Chat Assistant";
+}
+
+<div class="d-flex justify-content-center mt-4">
+    <div class="col-lg-8">
+        <h4 class="mb-3">Chat Assistant</h4>
+        <p class="text-muted">General chat with assistant.</p>
+
+        <div class="mb-3">
+            <button id="openChatBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#chatModal">Open Chat</button>
+            <button id="openSessionBtn" class="btn btn-outline-primary ms-2">Open Chat (Session)</button>
+        </div>
+
+        <div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Assistant <span id="sessionBadge" class="badge bg-success ms-2 d-none">Session</span></h5>
+                        <button type="button" class="btn btn-outline-secondary me-2" id="clearChatBtn">Clear</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="chatContainer" style="max-height:60vh; overflow:auto;">
+                            <ul id="messages" class="list-unstyled"></ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="chatForm" class="w-100 d-flex" onsubmit="return false;">
+                            <input id="messageInput" class="form-control me-2" placeholder="Type a message..." autocomplete="off" />
+                            <button id="sendBtn" class="btn btn-primary">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const messagesEl = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearChatBtn');
+    const openChatBtn = document.getElementById('openChatBtn');
+    const openSessionBtn = document.getElementById('openSessionBtn');
+    const sessionBadge = document.getElementById('sessionBadge');
+
+    // Flag: when true, messages are sent to ChatWithSession endpoint
+    let useSession = false;
+
+    function appendMessage(role, text) {
+        const li = document.createElement('li');
+        li.className = role === 'user' ? 'mb-2 text-end' : 'mb-2 text-start';
+        const inner = document.createElement('div');
+        inner.className = `p-2 rounded ${role === 'user' ? 'bg-primary text-white' : 'bg-light text-dark'}`;
+        inner.style.maxWidth = '80%';
+        inner.style.display = 'inline-block';
+        inner.style.whiteSpace = 'pre-wrap';
+        inner.textContent = text;
+        li.appendChild(inner);
+        messagesEl.appendChild(li);
+        // scroll
+        const container = document.getElementById('chatContainer');
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function clearChat() {
+        messagesEl.innerHTML = '';
+    }
+
+    async function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+        appendMessage('user', text);
+        messageInput.value = '';
+        sendBtn.disabled = true;
+
+        const url = useSession ? '/Chat/ChatWithSession' : '/Chat/Chat';
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => null);
+                const msg = err?.error || `Server error: ${res.status}`;
+                appendMessage('assistant', msg);
+            } else {
+                const data = await res.json();
+                appendMessage('assistant', data?.response || 'No response');
+            }
+        } catch (err) {
+            appendMessage('assistant', 'Error contacting assistant');
+        } finally {
+            sendBtn.disabled = false;
+            messageInput.focus();
+        }
+    }
+
+    // Open buttons set mode and open modal
+    openChatBtn.addEventListener('click', function () {
+        useSession = false;
+        sessionBadge.classList.add('d-none');
+    });
+
+    openSessionBtn.addEventListener('click', function () {
+        useSession = true;
+        sessionBadge.classList.remove('d-none');
+        const modalEl = document.getElementById('chatModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    });
+
+    // Event listeners
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    clearBtn.addEventListener('click', function () {
+        clearChat();
+        messageInput.focus();
+    });
+
+    // Example prompts (if present on the page)
+    document.querySelectorAll('.example-prompt').forEach(a => {
+        a.addEventListener('click', function (e) {
+            e.preventDefault();
+            const text = this.textContent.trim();
+            // open modal in non-session mode by default
+            useSession = false;
+            sessionBadge.classList.add('d-none');
+            const modalEl = document.getElementById('chatModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+            messageInput.value = text;
+            messageInput.focus();
+        });
+    });
+
+    // Focus input when modal opens
+    const chatModalEl = document.getElementById('chatModal');
+    chatModalEl.addEventListener('shown.bs.modal', function () {
+        messageInput.focus();
+    });
+</script>
+}
