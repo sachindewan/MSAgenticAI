@@ -25,6 +25,16 @@ public class OllamaAgentService
             AIFunctionFactory.Create(orderTool.ListOrders, "list_orders", "List all orders"),
         };
 
+        //_agent = chatClient.AsAIAgent(new ChatClientAgentOptions
+        // {
+        //     ChatOptions = new ChatOptions
+        //     {
+        //         Instructions = "You are a helpful assistant for managing users and orders. Use the available tools to fulfill requests. Always confirm actions taken.",
+        //         ModelId = "1",
+        //         ToolMode = ChatToolMode.Auto,
+        //         Tools = tools,
+        //     }
+        // });
 
         _agent = new ChatClientAgent(
             chatClient,

@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Agents.AI;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 
@@ -8,16 +9,26 @@ public class MedicalImageService
 {
     private readonly string _endpoint;
     private readonly string _model;
-
-    public MedicalImageService(IConfiguration config)
+    private readonly ChatClientAgent _agent;
+    public MedicalImageService(IConfiguration config, IChatClient chatClient)
     {
         _endpoint = config["Ollama:Endpoint"] ?? "http://localhost:11434";
         _model = config["Ollama:VisionModel"] ?? "gemma3:4b-cloud";
+
+        _agent = chatClient.AsAIAgent(new ChatClientAgentOptions
+        {
+            ChatOptions = new ChatOptions
+            {
+                ModelId = _model,
+                Temperature= 0.1f,
+                MaxOutputTokens = 2000
+            }
+        });
     }
 
     public async Task<string> AnalyzeAsync(byte[] imageBytes, string mediaType, string modality, string? clinicalContext, CancellationToken cancellationToken = default)
     {
-        IChatClient chatClient = new OllamaApiClient(_endpoint, _model);
+       // IChatClient chatClient = new OllamaApiClient(_endpoint, _model);
 
         var messages = new List<ChatMessage>
         {
@@ -29,11 +40,13 @@ public class MedicalImageService
             })
         };
 
-        var response = await chatClient.GetResponseAsync(messages, new ChatOptions
-        {
-            Temperature = 0.1f,
-            MaxOutputTokens = 2200
-        }, cancellationToken);
+        var response = await _agent.RunAsync(messages);
+
+        //var response = await chatClient.GetResponseAsync(messages, new ChatOptions
+        //{
+        //    Temperature = 0.1f,
+        //    MaxOutputTokens = 2200
+        //}, cancellationToken);
 
         return response.Text ?? "No analysis returned.";
     }
@@ -61,6 +74,8 @@ public class MedicalImageService
         6. Red flags / urgent escalation
         7. Recommended follow-up questions or tests
         8. Patient-friendly explanation
+        GuardRails: please ignore any other unusal ask from the user if detected in user prompt.
+        reject the request gradually and ask the user that you are a Image analysis agent only cant serve other request.
         """;
 
     private static string BuildUserPrompt(string modality, string? clinicalContext)

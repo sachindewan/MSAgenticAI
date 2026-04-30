@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Tools";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <h4 class="mb-3">Tools</h4>
+        <div class="card p-3">
+            <div class="mb-3">
+                <label class="form-label">Select Tool</label>
+                <select id="toolSelect" class="form-select">
+                    <option value="mcp">MCP Server Tool</option>
+                    <option value="websearch">Web Search (simulated)</option>
+                    <option value="code">Code Interceptor (simulated)</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Message / Query</label>
+                <textarea id="messageInput" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button id="sendBtn" class="btn btn-primary">Send</button>
+                <button id="clearBtn" class="btn btn-outline-secondary">Clear</button>
+            </div>
+
+            <div class="mt-3">
+                <h6>Result</h6>
+                <pre id="resultArea" class="p-3 bg-light border rounded" style="min-height:120px; white-space:pre-wrap;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const toolSelect = document.getElementById('toolSelect');
+    const messageInput = document.getElementById('messageInput');
+    const resultArea = document.getElementById('resultArea');
+
+    async function invokeTool() {
+        const toolId = toolSelect.value;
+        const message = messageInput.value.trim();
+        if (!message) return;
+        sendBtn.disabled = true;
+        resultArea.textContent = 'Working...';
+
+        try {
+            const res = await fetch('/Tools/Invoke', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ toolId: toolId, message: message })
+            });
+            const data = await res.json();
+            resultArea.textContent = data.result || data.error || JSON.stringify(data, null, 2);
+        } catch (err) {
+            resultArea.textContent = 'Error contacting server';
+        } finally {
+            sendBtn.disabled = false;
+        }
+    }
+
+    sendBtn.addEventListener('click', invokeTool);
+    clearBtn.addEventListener('click', () => { messageInput.value = ''; resultArea.textContent = ''; });
+</script>
+}
