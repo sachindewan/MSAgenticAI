@@ -55,7 +55,7 @@
                 body: JSON.stringify({ toolId: toolId, message: message })
             });
             const data = await res.json();
-            resultArea.textContent = data.result || data.error || JSON.stringify(data, null, 2);
+            resultArea.innerHTML = data.result || data.error || JSON.stringify(data, null, 2);
         } catch (err) {
             resultArea.textContent = 'Error contacting server';
         } finally {

@@ -25,6 +25,8 @@ builder.Services.AddSingleton<OllamaAgentService>();
 builder.Services.AddSingleton<MedicalImageService>();
 builder.Services.AddSingleton<ChatLoopService>();
 builder.Services.AddSingleton<MCPServerToolService>();
+builder.Services.AddSingleton<WebsearchToolService>();
+builder.Services.AddSingleton<IngestDataIntoVectorStoreService>();
 
 var app = builder.Build();
 

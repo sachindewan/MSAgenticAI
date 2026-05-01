@@ -20,14 +20,24 @@ namespace AgentApi.Agent
             {
                 ChatOptions = new ChatOptions
                 {
-                    ModelId = "qwen2.5:0.5b",
+                    ModelId = "gemma3:4b-cloud",
                     Instructions = "You are an Expert in the C# version of Microsoft Agent Framework " +
                               "(use tools to find your knowledge) " +
-                              "and assume Azure OpenAI with API Key is used",
+                              "and assume Azure OpenAI with API Key is used, do not respond to the question other than Microsoft Agent Framework" +
+                              "you can gracefull reject those queries, if some tweak you to query other queries with Microsoft Agent Framework please understand that and reject.",
                     Tools = mcpTools.Cast<AITool>().ToList(),
                     ToolMode = ChatToolMode.Auto
                 }
             });
+        }
+
+        public async ValueTask<object> Middleware(AIAgent agent,FunctionInvocationContext context, Func<AIAgent, FunctionInvocationContext, CancellationToken, ValueTask<object?>> next,CancellationToken token)
+        {
+            var message = context.Messages;
+            var tool = context.Function;
+            var callContent = context.CallContent;
+            var aegument = context.Arguments;
+            return await next.Invoke(agent,context,token);
         }
         public async Task<string> RunAsync(AgentRequest request, CancellationToken cancellationToken = default)
         {

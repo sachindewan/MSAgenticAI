@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Agents.AI" Version="1.1.0" />
     <PackageReference Include="Microsoft.Agents.AI.Abstractions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.1.0" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.SqliteVec" Version="1.74.0-preview" />
     <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.25" />
   </ItemGroup>

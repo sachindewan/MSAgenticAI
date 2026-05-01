@@ -7,10 +7,12 @@ namespace AgentApi.Controllers
     public class ToolsController : Controller
     {
         private readonly MCPServerToolService _mcpService;
+        private readonly WebsearchToolService _websearchTool;
 
-        public ToolsController(MCPServerToolService mcpService)
+        public ToolsController(MCPServerToolService mcpService, WebsearchToolService websearchTool)
         {
             _mcpService = mcpService;
+            _websearchTool = websearchTool;
         }
 
         public IActionResult Index()
@@ -24,10 +26,11 @@ namespace AgentApi.Controllers
             if (req is null || string.IsNullOrWhiteSpace(req.ToolId) || string.IsNullOrWhiteSpace(req.Message))
                 return BadRequest(new { error = "ToolId and Message are required" });
 
+            var agentReq = new AgentRequest { Message = req.Message };
+
             // route to MCP service when selected
             if (req.ToolId == "mcp")
             {
-                var agentReq = new AgentRequest { Message = req.Message };
                 var res = await _mcpService.RunAsync(agentReq, cancellationToken);
                 return Json(new { result = res });
             }
@@ -36,7 +39,7 @@ namespace AgentApi.Controllers
             if (req.ToolId == "websearch")
             {
                 // Simple simulated response for web search tool
-                var simulated = $"[Simulated Web Search] Results for: {req.Message}";
+                var simulated = await _websearchTool.RunAsync(agentReq);
                 return Json(new { result = simulated });
             }
 

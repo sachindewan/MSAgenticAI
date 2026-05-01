@@ -1,0 +1,63 @@
+@model List<AgentApi.Agent.IngestDataIntoVectorStoreService.SearchResult>
+@{
+    ViewData["Title"] = "RAG Support";
+    var query = ViewData["Query"] as string ?? string.Empty;
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <h4 class="mb-3">RAG (Retrieval-Augmented Generation)</h4>
+
+        @if (ViewData["Message"] is not null)
+        {
+            <div class="alert alert-success">@ViewData["Message"]</div>
+        }
+
+        <div class="card p-3 mb-3">
+            <form method="post" asp-action="Ingest" class="mb-3">
+                <button type="submit" class="btn btn-primary">Run Ingest</button>
+            </form>
+
+            <form method="post" asp-action="Search" class="row g-2 align-items-center">
+                <div class="col-sm-8">
+                    <input name="query" value="@query" class="form-control" placeholder="Enter query to search the knowledge base..." />
+                </div>
+                <div class="col-sm-2">
+                    <select name="top" class="form-select">
+                        <option value="1">Top 1</option>
+                        <option value="3" selected>Top 3</option>
+                        <option value="5">Top 5</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+                </div>
+            </form>
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <h5>Results for "@query"</h5>
+            <div class="list-group">
+                @foreach (var r in Model)
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">@r.Question</h6>
+                            <small class="text-muted">Score: @r.Score.ToString("F3")</small>
+                        </div>
+                        <p class="mb-1">@r.Answer</p>
+                    </div>
+                }
+            </div>
+        }
+        else if (!string.IsNullOrWhiteSpace(query))
+        {
+            <p class="text-muted">No results found for "@query".</p>
+        }
+        else
+        {
+            <p class="text-muted">No results yet. Ingest data first or run a search.</p>
+        }
+    </div>
+</div>
